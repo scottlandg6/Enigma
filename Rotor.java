@@ -1,20 +1,39 @@
 package enigma;
-
 /** Class that represents a rotor in the enigma machine.
- *  @author
+ *  @author Scott Lee
  */
 class Rotor {
-    // This needs other methods, fields, and constructors.
-
     /** Size of alphabet used for plaintext and ciphertext. */
     static final int ALPHABET_SIZE = 26;
+    /** Total number of rotors - 1. */
+    static final int TOTAL_NUMBER = 12;
+    /** Public class Rotor takes in String ROTORNAME and creates Rotors. */
+    public Rotor(String rotorname) {
+        _setting = 0;
+        for (int i = 0; i < TOTAL_NUMBER; i += 1) {
+            if (PermutationData.ROTOR_SPECS[i][0].equals(rotorname)) {
+                forwardperm = PermutationData.ROTOR_SPECS[i][1];
+                if (PermutationData.ROTOR_SPECS[i].length >= 3) {
+                    backperm = PermutationData.ROTOR_SPECS[i][2];
+                    if (PermutationData.ROTOR_SPECS[i].length == 4) {
+                        notches = PermutationData.ROTOR_SPECS[i][3];
+                    }
+                }
+            }
+        }
+    }
+
+    /** Returns X mod 26. */
+    static int mod(int x) {
+        assert x >= -ALPHABET_SIZE;
+        return (x + ALPHABET_SIZE) % ALPHABET_SIZE;
+    }
 
     /** Assuming that P is an integer in the range 0..25, returns the
      *  corresponding upper-case letter in the range A..Z. */
     static char toLetter(int p) {
-        assert p >= 0 && p < 26;
+        assert p >= 0 && p < ALPHABET_SIZE;
         return (char) ('A' + p);
-        
     }
 
     /** Assuming that C is an upper-case letter in the range A-Z, return the
@@ -42,35 +61,41 @@ class Rotor {
 
     /** Set getSetting() to POSN.  */
     void set(int posn) {
-        assert 0 <= posn && posn < ALPHABET_SIZE;
-        _setting = posn;
+        _setting = mod(posn);
     }
 
     /** Return the conversion of P (an integer in the range 0..25)
      *  according to my permutation. */
     int convertForward(int p) {
-        
+        char a = forwardperm.charAt(mod(p + _setting));
+        return mod(toIndex(a) - _setting);
     }
 
     /** Return the conversion of E (an integer in the range 0..25)
      *  according to the inverse of my permutation. */
     int convertBackward(int e) {
-        return 0; // FIXME
+        char b = backperm.charAt(mod(e + _setting));
+        return mod(toIndex(b) - _setting);
     }
 
     /** Returns true iff I am positioned to allow the rotor to my left
      *  to advance. */
     boolean atNotch() {
-        return false; // FIXME
+        return notches.contains(Character.toString(toLetter(
+                mod(_setting))));
     }
-
     /** Advance me one position. */
     void advance() {
-        // FIXME
+        _setting = mod(_setting + 1);
     }
 
     /** My current setting (index 0..25, with 0 indicating that 'A'
      *  is showing). */
     private int _setting;
-
+    /** Forwards permutation. */
+    private String forwardperm;
+    /** Notch settings. */
+    private String notches;
+    /** Backwards permutation. */
+    private String backperm;
 }
